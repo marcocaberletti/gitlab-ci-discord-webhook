@@ -11,7 +11,7 @@ usage(){
     echo
 }
 
-while getopts ":hu:p:H:r:q:" opt; do
+while getopts ":h:t:d:c:w:" opt; do
   case $opt in
     h | --help) usage; exit 0 >&2;;
     t | --title) title=$OPTARG;;
@@ -69,9 +69,6 @@ else
   URL="$CI_PROJECT_URL/merge_requests/$CI_MERGE_REQUEST_ID"
 fi
 
-TIMESTAMP=$(date --utc +%FT%TZ)
-
-
 WEBHOOK_DATA='{
   "avatar_url": "https://gitlab.com/favicon.png",
   "embeds": [ {
@@ -95,13 +92,12 @@ WEBHOOK_DATA='{
         "value": "'"[\`$CI_COMMIT_REF_NAME\`]($CI_PROJECT_URL/tree/$CI_COMMIT_REF_NAME)"'",
         "inline": true
       }
-      ],
-      "timestamp": "'"$TIMESTAMP"'"
-    } ]
-  }'
+    ]
+  } ]
+}'
 
 
 echo -e "[Webhook]: Sending webhook to Discord...\\n";
-
+echo $WEBHOOK_DATA
 (curl --fail --progress-bar -A "GitLabCI-Webhook" -H Content-Type:application/json -d "$WEBHOOK_DATA" "$webhook" \
 && echo -e "\\n[Webhook]: Successfully sent the webhook.") || echo -e "\\n[Webhook]: Unable to send webhook."
