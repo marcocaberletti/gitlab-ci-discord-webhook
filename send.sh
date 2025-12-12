@@ -54,7 +54,6 @@ fi
 AUTHOR_NAME="$(git log -1 "$CI_COMMIT_SHA" --pretty="%aN")"
 COMMITTER_NAME="$(git log -1 "$CI_COMMIT_SHA" --pretty="%cN")"
 COMMIT_SUBJECT="$(git log -1 "$CI_COMMIT_SHA" --pretty="%s")"
-COMMIT_MESSAGE="$(git log -1 "$CI_COMMIT_SHA" --pretty="%b")" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g'
 
 
 if [ "$AUTHOR_NAME" == "$COMMITTER_NAME" ]; then
@@ -80,7 +79,7 @@ WEBHOOK_DATA='{
     },
     "title": "'"$title"'",
     "url": "'"$URL"'",
-    "description": "'"$description\\n\\n${COMMIT_MESSAGE//$'\n'/ }"\\n\\n"$CREDITS"'",
+    "description": "'"$description\\n\\n${COMMIT_SUBJECT//$'\n'/ }"\\n\\n"$CREDITS"'",
     "fields": [
       {
         "name": "Commit",
@@ -98,6 +97,6 @@ WEBHOOK_DATA='{
 
 
 echo -e "[Webhook]: Sending webhook to Discord...\\n";
-echo $WEBHOOK_DATA
+
 (curl --fail --progress-bar -A "GitLabCI-Webhook" -H Content-Type:application/json -d "$WEBHOOK_DATA" "$webhook" \
 && echo -e "\\n[Webhook]: Successfully sent the webhook.") || echo -e "\\n[Webhook]: Unable to send webhook."
